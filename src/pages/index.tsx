@@ -1,8 +1,8 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
-import Image from 'next/image'
+import Head from "next/head";
+import styles from "../styles/Home.module.css";
+import Image from "next/image";
 
-import heroImage from "../../public/assets/hero.png"
+import heroImage from "../../public/assets/hero.png";
 
 export default function Home() {
   return (
@@ -22,9 +22,15 @@ export default function Home() {
         </div>
         <h1 className={styles.title}>Let's organize your tasks!</h1>
 
-        
+        <div className={styles.infoContent}>
+          <section className={styles.box}>
+            <span>+12 posts</span>
+          </section>
+          <section className={styles.box}>
+            <span>+12 comments</span>
+          </section>
+        </div>
       </main>
-
     </div>
-  )
+  );
 }

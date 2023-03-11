@@ -28,3 +28,20 @@
   margin: 28px;
   line-height: 150%;
 }
+
+.infoContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.box {
+  background-color: #fafafa;
+  padding: 14px 44px;
+  transition: transform 0.4s;
+  border-radius: 4px;
+}
+
+.box:hover {
+  transform: scale(1.08);
+}
