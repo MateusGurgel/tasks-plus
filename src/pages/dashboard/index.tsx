@@ -13,12 +13,15 @@ import { db } from "../../services/firebaseConnection";
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   onSnapshot,
   orderBy,
   query,
   where,
 } from "firebase/firestore";
 import Link from "next/link";
+import { async } from "@firebase/util";
 
 interface HomeProps {
   user: {
@@ -48,6 +51,11 @@ export default function Dashboard({ user }: HomeProps) {
         `${process.env.NEXT_PUBLIC_URL}/tasks/${id}`
       )
   } 
+
+  async function handleDelete(id: string) {
+    const docRef = doc(db, "task", id)
+    await deleteDoc(docRef)
+  }
 
   useEffect(() => {
     async function loadTasks() {
@@ -158,7 +166,7 @@ export default function Dashboard({ user }: HomeProps) {
                   <p>{task.task}</p>
                 )}
 
-                <button className={styles.trashButton}>
+                <button className={styles.trashButton} onClick={() => handleDelete(task.id)}>
                   <FaTrash size={24} color="#ea3140" />
                 </button>
               </div>
