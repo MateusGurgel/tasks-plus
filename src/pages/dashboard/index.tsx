@@ -27,7 +27,7 @@ interface HomeProps {
 }
 
 interface TaskProps {
-  id: String;
+  id: string;
   created: Date;
   public: boolean;
   task: string;
@@ -42,6 +42,12 @@ export default function Dashboard({ user }: HomeProps) {
   function handleChangePublic(event: ChangeEvent<HTMLInputElement>) {
     setPublicTask(event.target.checked);
   }
+
+  async function handleShare(id: string) {
+      await navigator.clipboard.writeText(
+        `${process.env.NEXT_PUBLIC_URL}/tasks/${id}`
+      )
+  } 
 
   useEffect(() => {
     async function loadTasks() {
@@ -137,7 +143,7 @@ export default function Dashboard({ user }: HomeProps) {
               {task.public && (
                 <div className={styles.tagContainer}>
                   <label className={styles.tag}>Public</label>
-                  <button className={styles.shareButton}>
+                  <button className={styles.shareButton} onClick={() => handleShare(task.id)}>
                     <FiShare2 size={22} color="#3183ff" />
                   </button>
                 </div>
