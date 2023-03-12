@@ -10,7 +10,15 @@ import { FaTrash } from "react-icons/fa";
 
 import { db } from "../../services/firebaseConnection";
 
-import { addDoc, collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
+import Link from "next/link";
 
 interface HomeProps {
   user: {
@@ -18,20 +26,57 @@ interface HomeProps {
   };
 }
 
+interface TaskProps {
+  id: String;
+  created: Date;
+  public: boolean;
+  task: string;
+  user: string;
+}
+
 export default function Dashboard({ user }: HomeProps) {
   const [input, setInput] = useState("");
   const [publicTask, setPublicTask] = useState(false);
+  const [tasks, setTasks] = useState<TaskProps[]>([]);
 
   function handleChangePublic(event: ChangeEvent<HTMLInputElement>) {
     setPublicTask(event.target.checked);
   }
 
+  useEffect(() => {
+    async function loadTasks() {
+      const tasksRef = collection(db, "task");
+      const result = query(
+        tasksRef,
+        orderBy("created", "desc"),
+        where("user", "==", user.email)
+      );
+
+      onSnapshot(result, (snapShot) => {
+        let list = [] as TaskProps[];
+
+        snapShot.forEach((doc) => {
+          list.push({
+            id: doc.id,
+            task: doc.data().task,
+            created: doc.data().created,
+            user: doc.data().user,
+            public: doc.data().public,
+          });
+        });
+
+        setTasks(list);
+      });
+    }
+
+    loadTasks();
+  }, [user.email]);
+
   async function handleRegisterTask(event: FormEvent) {
     event.preventDefault();
 
-    
     if (input === "") return;
-    
+
     try {
       await addDoc(collection(db, "task"), {
         task: input,
@@ -39,7 +84,7 @@ export default function Dashboard({ user }: HomeProps) {
         user: user?.email,
         public: publicTask,
       });
-      
+
       setInput("");
       setPublicTask(false);
     } catch (err) {
@@ -87,21 +132,32 @@ export default function Dashboard({ user }: HomeProps) {
         <section className={styles.taskContainer}>
           <h1>My tasks</h1>
 
-          <article className={styles.task}>
-            <div className={styles.tagContainer}>
-              <label className={styles.tag}>Public</label>
-              <button className={styles.shareButton}>
-                <FiShare2 size={22} color="#3183ff" />
-              </button>
-            </div>
+          {tasks.map((task) => (
+            <article className={styles.task}>
+              {task.public && (
+                <div className={styles.tagContainer}>
+                  <label className={styles.tag}>Public</label>
+                  <button className={styles.shareButton}>
+                    <FiShare2 size={22} color="#3183ff" />
+                  </button>
+                </div>
+              )}
 
-            <div className={styles.taskContent}>
-              <p>my first task!</p>
-              <button className={styles.trashButton}>
-                <FaTrash size={24} color="#ea3140" />
-              </button>
-            </div>
-          </article>
+              <div className={styles.taskContent}>
+                {task.public ? (
+                  <Link href={`/task/${task.id}`}>
+                    <p>{task.task}</p>
+                  </Link>
+                ) : (
+                  <p>{task.task}</p>
+                )}
+
+                <button className={styles.trashButton}>
+                  <FaTrash size={24} color="#ea3140" />
+                </button>
+              </div>
+            </article>
+          ))}
         </section>
       </main>
     </div>
