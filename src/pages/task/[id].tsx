@@ -1,8 +1,11 @@
 import { Textarea } from "@/components/textArea";
 import { db } from "@/services/firebaseConnection";
-import { doc, getDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import { Session } from "inspector";
 import { GetServerSideProps } from "next";
+import { useSession } from "next-auth/react";
 import Head from "next/head";
+import { ChangeEvent, FormEvent, useState } from "react";
 import styles from "../task/styles.module.css";
 
 interface TaskProps {
@@ -16,25 +19,58 @@ interface TaskProps {
 }
 
 export default function Task({ item }: TaskProps) {
+  const { data: session } = useSession();
+  const [input, setInput] = useState("");
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+
+    if (input === "") return;
+
+    if (!session?.user?.email || !session?.user?.name) return;
+
+    try {
+      const docRef = await addDoc(collection(db, "comments"), {
+        comment: input,
+        created: new Date(),
+        user: session?.user?.email,
+        name: session?.user?.name,
+        taskId: item?.taskId,
+      });
+
+      setInput("");
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
     <div className={styles.container}>
       <Head>
-        <title>Tarefa - Detalhes da tarefa</title>
+        <title>Task - Task details</title>
       </Head>
 
       <main className={styles.main}>
-        <h1>Tarefa</h1>
+        <h1>Task</h1>
         <article className={styles.task}>
           <p>{item.task}</p>
         </article>
       </main>
 
       <section className={styles.commentsContainer}>
-        <h2>Deixar comentário</h2>
+        <h2>Leave a comment</h2>
 
-        <form>
-          <Textarea placeholder="Digite seu comentário..." />
-          <button className={styles.button}>Enviar comentário</button>
+        <form onSubmit={handleSubmit}>
+          <Textarea
+            value={input}
+            placeholder="Type something!..."
+            onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
+              setInput(event.target.value);
+            }}
+          />
+          <button className={styles.button} disabled={!session?.user}>
+            Send
+          </button>
         </form>
       </section>
     </div>
