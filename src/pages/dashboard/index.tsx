@@ -147,7 +147,7 @@ export default function Dashboard({ user }: HomeProps) {
           <h1>My tasks</h1>
 
           {tasks.map((task) => (
-            <article className={styles.task}>
+            <article className={styles.task} key={task.id}>
               {task.public && (
                 <div className={styles.tagContainer}>
                   <label className={styles.tag}>Public</label>
