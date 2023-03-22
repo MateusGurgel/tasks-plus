@@ -21,7 +21,6 @@ import {
   where,
 } from "firebase/firestore";
 import Link from "next/link";
-import { async } from "@firebase/util";
 
 interface HomeProps {
   user: {
